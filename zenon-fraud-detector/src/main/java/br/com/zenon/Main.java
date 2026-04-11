@@ -2,8 +2,7 @@ package br.com.zenon;
 
 import br.com.zenon.fraud.domain.model.Transaction;
 import br.com.zenon.fraud.domain.model.TransactionMapper;
-import br.com.zenon.fraud.domain.model.TransactionType;
-import br.com.zenon.infrastructure.TransactionIngestor;
+import br.com.zenon.fraud.infrastructure.TransactionIngestor;
 
 import java.util.List;
 
@@ -19,11 +18,17 @@ public class Main {
         IO.println(transaction1);
         IO.println(transaction2);
         */
+        /*
         TransactionIngestor transactionIngestor = new TransactionIngestor();
         List<Transaction> transactions = transactionIngestor.ToTransactionList("data/archive/PS_20174392719_1491204439457_log.csv");
 
         for(int i = 0; i < 10; i++) {
             IO.println(transactions.get(i));
         }
+        */
+        TransactionIngestor transactionIngestor2 = new TransactionIngestor();
+        List<Transaction> transactions2 = transactionIngestor2.ToTransactionList("data/archive/paysim_with_bad_data.csv.txt");
+
+        transactions2.forEach(IO::println);
     }
 }
