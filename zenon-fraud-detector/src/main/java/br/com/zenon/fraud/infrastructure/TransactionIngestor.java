@@ -18,7 +18,7 @@ public class TransactionIngestor {
             String line = br.readLine();
 
             int contador = 0;
-            while ((line = br.readLine()) != null && contador < 1000) {
+            while ((line = br.readLine()) != null && contador < 50000) {
                 try {
                     String[] v = line.split(",");
                     transactionList.add(transactionMapper.ToDomain
