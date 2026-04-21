@@ -4,6 +4,7 @@ import br.com.zenon.fraud.domain.model.Transaction;
 import br.com.zenon.fraud.infrastructure.Interfaces.TransactionRepository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class TransactionListRepository implements TransactionRepository {
@@ -11,8 +12,10 @@ public class TransactionListRepository implements TransactionRepository {
     private final List<Transaction> _transactions;
 
     public TransactionListRepository(List<Transaction> transactions) {
+        Objects.requireNonNull(transactions);
         _transactions = transactions;
     }
+
     @Override
     public Optional<Transaction> GetTransactionByCustomerName(String customerName) {
 

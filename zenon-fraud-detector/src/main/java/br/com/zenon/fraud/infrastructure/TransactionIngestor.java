@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class TransactionIngestor {
@@ -75,13 +76,13 @@ public class TransactionIngestor {
             List<String> lines = Files.readAllLines(path);
             return lines.stream()
                     .skip(1)
-                    //.limit(FRAUD_LIMIT)
+                    .limit(FRAUD_LIMIT)
                     .map(this::parseTransaction)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .collect(Collectors.toMap(
                             t -> t.customerOrig().name(),
-                            t -> t));
+                            Function.identity()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

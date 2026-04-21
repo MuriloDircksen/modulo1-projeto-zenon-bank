@@ -15,6 +15,24 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 public class TransactionReport {
+    private record ReportTransaction(BigDecimal amount, boolean isFraud){}
+
+    public record Statics(long totalTransaction, long totalFruad, BigDecimal totalAmount){
+        private static final Statics Zero = new Statics(0, 0, BigDecimal.ZERO);
+
+        private Statics addReport(ReportTransaction rt) {
+            return new Statics(
+                    totalTransaction + 1,
+                    totalFruad + (rt.isFraud ? 1: 0),
+                    totalAmount.add(rt.amount));
+        }
+
+        private Statics add(Statics other) {
+            return new Statics(totalTransaction + other.totalTransaction,
+                    totalFruad + other.totalFruad, totalAmount.add(other.totalAmount));
+        }
+    };
+
 
     public void GenerateReport (String path, Locale locale) {
         try(Stream<String> lines = Files.lines(Path.of(path))) {
@@ -68,6 +86,45 @@ public class TransactionReport {
                     chunks[5], chunks[6], chunks[7], chunks[8], chunks[9], chunks[10]
             );
             return Optional.of(transaction);
+        }catch (IllegalArgumentException e) {
+            System.err.println("Erro: " + line +" | "+ e.toString());
+            return Optional.empty();
+        }
+    }
+
+
+
+    public Statics GenerateReport2 (String path, Locale locale) {
+        try(Stream<String> lines = Files.lines(Path.of(path))) {
+
+            var result = lines
+                    .skip(1)
+                    .map(TransactionReport::parseReportTransaction)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .reduce(
+                            Statics.Zero,
+                            Statics::addReport,
+                            Statics::add
+                    );
+
+            ResourceBundle bundle = ResourceBundle.getBundle("message", locale);
+            IO.println(bundle.getString("totalLines") + ": " + result.totalTransaction());
+            IO.println(bundle.getString("totalFrauds") + ": " + result.totalFruad);
+            IO.println(bundle.getString("totalAmount") + ": %2f".formatted(result.totalAmount));
+            return result;
+        }
+        catch (IOException e) {
+            throw new RuntimeException();
+        }
+    }
+    private static Optional<ReportTransaction> parseReportTransaction(String line) {
+        try {
+            String[] chunks = line.split(",");
+
+            return Optional.of(new ReportTransaction(
+                    new BigDecimal(chunks[2]), chunks[9].equals("1")
+            ));
         }catch (IllegalArgumentException e) {
             System.err.println("Erro: " + line +" | "+ e.toString());
             return Optional.empty();
