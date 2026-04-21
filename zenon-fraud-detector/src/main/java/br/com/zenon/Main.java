@@ -2,10 +2,7 @@ package br.com.zenon;
 
 import br.com.zenon.fraud.domain.model.Transaction;
 import br.com.zenon.fraud.domain.model.TransactionMapper;
-import br.com.zenon.fraud.infrastructure.FraudAnalyzer;
-import br.com.zenon.fraud.infrastructure.TransactionIngestor;
-import br.com.zenon.fraud.infrastructure.TransactionListRepository;
-import br.com.zenon.fraud.infrastructure.TransactionMapRepository;
+import br.com.zenon.fraud.infrastructure.*;
 
 import java.util.List;
 
@@ -35,6 +32,7 @@ public class Main {
 
         transactions2.forEach(IO::println);
          */
+        /*
         TransactionIngestor transactionIngestor = new TransactionIngestor();
         List<Transaction> transactions = transactionIngestor.ToTransactionList2("data/archive/PS_20174392719_1491204439457_log.csv");
 
@@ -63,13 +61,17 @@ public class Main {
         var time2 = System.currentTimeMillis();
         result.ifPresent(IO::println);
         IO.println(time2-time1);
+        */
+        //var transactionMap = transactionIngestor.ToTransactionMap("data/archive/PS_20174392719_1491204439457_log.csv");
+        //var transactionMapRepository = new TransactionMapRepository(transactionMap);
+        //var time3 = System.currentTimeMillis();
+        //var resultMap = transactionMapRepository.GetTransactionByCustomerName("C1868032458");
+        //var time4 = System.currentTimeMillis();
+        //result.ifPresent(IO::println);
+        //IO.println(time4-time3);
 
-        var transactionMap = transactionIngestor.ToTransactionMap("data/archive/PS_20174392719_1491204439457_log.csv");
-        var transactionMapRepository = new TransactionMapRepository(transactionMap);
-        var time3 = System.currentTimeMillis();
-        var resultMap = transactionMapRepository.GetTransactionByCustomerName("C1868032458");
-        var time4 = System.currentTimeMillis();
-        result.ifPresent(IO::println);
-        IO.println(time4-time3);
+        TransactionReport transactionReport = new TransactionReport();
+        transactionReport.GenerateReport("data/archive/PS_20174392719_1491204439457_log.csv");
+
     }
 }

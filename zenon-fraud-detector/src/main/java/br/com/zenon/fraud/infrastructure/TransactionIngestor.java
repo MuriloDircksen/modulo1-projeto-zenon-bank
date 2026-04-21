@@ -75,7 +75,7 @@ public class TransactionIngestor {
             List<String> lines = Files.readAllLines(path);
             return lines.stream()
                     .skip(1)
-                    .limit(FRAUD_LIMIT)
+                    //.limit(FRAUD_LIMIT)
                     .map(this::parseTransaction)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
