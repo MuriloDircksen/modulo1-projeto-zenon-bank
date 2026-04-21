@@ -17,4 +17,9 @@ public class TransactionMapRepository implements TransactionRepository {
     public Optional<Transaction> GetTransactionByCustomerName(String customerName) {
         return Optional.ofNullable(_transactions.get(customerName));
     }
+
+    @Override
+    public void save(Transaction transaction) {
+
+    }
 }

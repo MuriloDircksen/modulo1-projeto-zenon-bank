@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class TransactionIngestor {
-    public static final int FRAUD_LIMIT = 100000;
+    public static final int FRAUD_LIMIT = 10000;
 
     public List<Transaction> ToTransactionList(String pathName) {
         List<Transaction> transactionList = new ArrayList<>();
