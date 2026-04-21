@@ -8,13 +8,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class TransactionIngestor {
-    public static final int FRAUD_LIMIT = 50000;
+    public static final int FRAUD_LIMIT = 100000;
 
     public List<Transaction> ToTransactionList(String pathName) {
         List<Transaction> transactionList = new ArrayList<>();
@@ -68,6 +66,24 @@ public class TransactionIngestor {
         }catch (IllegalArgumentException e) {
             System.err.println("Erro: " + line +" | "+ e.toString());
             return Optional.empty();
+        }
+    }
+
+    public Map<String, Transaction> ToTransactionMap(String pathName) {
+        Path path = Path.of(pathName);
+        try {
+            List<String> lines = Files.readAllLines(path);
+            return lines.stream()
+                    .skip(1)
+                    .limit(FRAUD_LIMIT)
+                    .map(this::parseTransaction)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toMap(
+                            t -> t.customerOrig().name(),
+                            t -> t));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

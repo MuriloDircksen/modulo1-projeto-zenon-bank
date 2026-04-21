@@ -4,6 +4,8 @@ import br.com.zenon.fraud.domain.model.Transaction;
 import br.com.zenon.fraud.domain.model.TransactionMapper;
 import br.com.zenon.fraud.infrastructure.FraudAnalyzer;
 import br.com.zenon.fraud.infrastructure.TransactionIngestor;
+import br.com.zenon.fraud.infrastructure.TransactionListRepository;
+import br.com.zenon.fraud.infrastructure.TransactionMapRepository;
 
 import java.util.List;
 
@@ -48,6 +50,26 @@ public class Main {
         fraudAnalyzer.GetFraudCountByType(transactions)
                 .forEach((type, count) -> IO.println(type + ": " + count));
 
+        TransactionListRepository transactionListRepository = new TransactionListRepository(transactions);
+        var result = transactionListRepository.GetTransactionByCustomerName("C1231006815");
+        result.ifPresent(IO::println);
+        var result2 = transactionListRepository.GetTransactionByCustomerName("C12345");
+        result2.ifPresentOrElse(
+                IO::println,
+                () -> IO.println("Transação não encontrada para o cliente " + "C12345")
+        );
+        var time1 = System.currentTimeMillis();
+        var result3 = transactionListRepository.GetTransactionByCustomerName("C1868032458");
+        var time2 = System.currentTimeMillis();
+        result.ifPresent(IO::println);
+        IO.println(time2-time1);
 
+        var transactionMap = transactionIngestor.ToTransactionMap("data/archive/PS_20174392719_1491204439457_log.csv");
+        var transactionMapRepository = new TransactionMapRepository(transactionMap);
+        var time3 = System.currentTimeMillis();
+        var resultMap = transactionMapRepository.GetTransactionByCustomerName("C1868032458");
+        var time4 = System.currentTimeMillis();
+        result.ifPresent(IO::println);
+        IO.println(time4-time3);
     }
 }
