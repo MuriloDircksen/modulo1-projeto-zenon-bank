@@ -5,6 +5,7 @@ import br.com.zenon.fraud.domain.model.TransactionMapper;
 import br.com.zenon.fraud.infrastructure.*;
 
 import java.util.List;
+import java.util.Locale;
 
 public class Main {
     void main() {
@@ -71,7 +72,7 @@ public class Main {
         //IO.println(time4-time3);
 
         TransactionReport transactionReport = new TransactionReport();
-        transactionReport.GenerateReport("data/archive/PS_20174392719_1491204439457_log.csv");
+        transactionReport.GenerateReport("data/archive/PS_20174392719_1491204439457_log.csv", Locale.of("pt", "BR"));
 
     }
 }

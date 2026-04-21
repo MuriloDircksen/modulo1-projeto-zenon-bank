@@ -8,13 +8,15 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 public class TransactionReport {
 
-    public void GenerateReport (String path) {
+    public void GenerateReport (String path, Locale locale) {
         try(Stream<String> lines = Files.lines(Path.of(path))) {
 
             AtomicLong countLines = new AtomicLong();
@@ -34,9 +36,10 @@ public class TransactionReport {
                             totalAmount[0] = totalAmount[0].add(transaction.amount());
                         }
                     });
-            IO.println("Total de linhas: " + countLines);
-            IO.println("Total de fraudes " + countFraud);
-            IO.println("Valor total transacionado: %2f".formatted(totalAmount[0]));
+            ResourceBundle bundle = ResourceBundle.getBundle("message", locale);
+            IO.println(bundle.getString("totalLines") + ": " + countLines);
+            IO.println(bundle.getString("totalFrauds") + ": " + countFraud);
+            IO.println(bundle.getString("totalAmount") + ": %2f".formatted(totalAmount[0]));
         }
         catch (IOException e) {
             throw new RuntimeException();
