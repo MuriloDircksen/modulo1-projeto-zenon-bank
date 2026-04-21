@@ -6,36 +6,41 @@ import br.com.zenon.fraud.domain.model.TransactionType;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FraudAnalyzer {
     public long GetFraudCount(List<Transaction> transactionList) {
-        return transactionList.stream()
-                .filter(Transaction::isFraud)
+        return getTransactionStream(transactionList)
                 .count();
     }
-    public List<BigDecimal> GetTop3BigFraud(List<Transaction> transactionList) {
-        return transactionList.stream()
-                .filter(Transaction::isFraud)
+    public List<BigDecimal> GetTopBigFraud(List<Transaction> transactionList, long size) {
+        return getTransactionStream(transactionList)
                 .sorted(Comparator.comparing(Transaction::amount).reversed())
-                .limit(3)
+                .limit(size)
                 .map(Transaction::amount)
                 .toList();
     }
-    public Set<String> GetSuspectCustomers(List<Transaction> transactionList) {
+
+    private static Stream<Transaction> getTransactionStream(List<Transaction> transactionList) {
         return transactionList.stream()
-                .filter(Transaction::isFraud)
+                .filter(Transaction::isFraud);
+    }
+
+    public List<String> GetSuspectCustomers(List<Transaction> transactionList, long size) {
+        return getTransactionStream(transactionList)
+                .sorted(Comparator.comparing(Transaction::amount).reversed())
                 .map(transaction -> transaction.customerOrig().name())
-                .collect(Collectors.toSet());
+                .distinct()
+                .limit(size)
+                .toList();
     }
     public BigDecimal GetTotalLoss(List<Transaction> transactionList) {
-        return transactionList.stream()
-                .filter(Transaction::isFraud)
+        return getTransactionStream(transactionList)
                 .map(Transaction::amount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
     public Map<TransactionType, Long> GetFraudCountByType(List<Transaction> transactionList) {
-        return transactionList.stream()
-                .filter(Transaction::isFraud)
+        return getTransactionStream(transactionList)
                 .collect(Collectors.groupingBy(
                         Transaction::type,
                         Collectors.counting()

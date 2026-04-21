@@ -34,19 +34,20 @@ public class Main {
         transactions2.forEach(IO::println);
          */
         TransactionIngestor transactionIngestor = new TransactionIngestor();
-        List<Transaction> transactions = transactionIngestor.ToTransactionList("data/archive/PS_20174392719_1491204439457_log.csv");
+        List<Transaction> transactions = transactionIngestor.ToTransactionList2("data/archive/PS_20174392719_1491204439457_log.csv");
 
         FraudAnalyzer fraudAnalyzer = new FraudAnalyzer();
 
         IO.println("1. Total de Fraudes: " + fraudAnalyzer.GetFraudCount(transactions));
         IO.println("\n2. Top 3 Fraudes de Maior Valor: ");
-        fraudAnalyzer.GetTop3BigFraud(transactions).forEach(IO::println);
+        fraudAnalyzer.GetTopBigFraud(transactions, 3).forEach(amount -> IO.println("- %2f".formatted(amount)));
         IO.println("\n3. Clientes Suspeitos: ");
-        fraudAnalyzer.GetSuspectCustomers(transactions).forEach(IO::println);
+        fraudAnalyzer.GetSuspectCustomers(transactions, 5).forEach(IO::println);
         IO.println("4. Prejuízo Total: " + fraudAnalyzer.GetTotalLoss(transactions));
         IO.println("\n5. Fraudes por Tipo: ");
         fraudAnalyzer.GetFraudCountByType(transactions)
-                .forEach((type, count) -> System.out.println(type + ": " + count));
+                .forEach((type, count) -> IO.println(type + ": " + count));
+
 
     }
 }

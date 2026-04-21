@@ -1,18 +1,22 @@
 package br.com.zenon.fraud.domain.model;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
-public record CustomerTransaction (String name, BigDecimal oldbalance, BigDecimal newbalance) {
+public record CustomerTransaction (String name, BigDecimal oldBalance, BigDecimal newBalance) {
 
     public CustomerTransaction {
-        if(name == null || name.isBlank()) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(oldBalance);
+        Objects.requireNonNull(newBalance);
+        if(name.isBlank()) {
             throw new IllegalArgumentException("name should not be empty");
         }
-        if (newbalance == null || newbalance.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("newBalance should be positive:" + newbalance);
+        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("newBalance should be positive:" + newBalance);
         }
-        if (oldbalance == null || oldbalance.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("oldBalance should be positive: " + oldbalance);
+        if (oldBalance.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("oldBalance should be positive: " + oldBalance);
         }
     }
 
@@ -20,8 +24,8 @@ public record CustomerTransaction (String name, BigDecimal oldbalance, BigDecima
     public String toString() {
         return "CustomerTransaction{" +
                 "name='" + name + '\'' +
-                ", oldbalance=" + oldbalance +
-                ", newbalance=" + newbalance +
+                ", oldbalance=" + oldBalance +
+                ", newbalance=" + newBalance +
                 '}';
     }
 }

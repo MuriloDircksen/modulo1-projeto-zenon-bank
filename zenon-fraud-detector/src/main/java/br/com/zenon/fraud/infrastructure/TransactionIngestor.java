@@ -6,19 +6,25 @@ import br.com.zenon.fraud.domain.model.TransactionMapper;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public class TransactionIngestor {
+    public static final int FRAUD_LIMIT = 50000;
+
     public List<Transaction> ToTransactionList(String pathName) {
-        List transactionList = new ArrayList<Transaction>();
+        List<Transaction> transactionList = new ArrayList<>();
 
         TransactionMapper transactionMapper = new TransactionMapper();
         try (BufferedReader br = new BufferedReader(new FileReader(pathName))) {
             String line = br.readLine();
 
             int contador = 0;
-            while ((line = br.readLine()) != null && contador < 50000) {
+            while ((line = br.readLine()) != null && contador < FRAUD_LIMIT) {
                 try {
                     String[] v = line.split(",");
                     transactionList.add(transactionMapper.ToDomain
@@ -32,5 +38,36 @@ public class TransactionIngestor {
             throw new RuntimeException(e);
         }
         return transactionList;
+    }
+
+    public List<Transaction> ToTransactionList2(String pathName) {
+        Path path = Path.of(pathName);
+        try {
+            List<String> lines = Files.readAllLines(path);
+            return lines.stream()
+                    .skip(1)
+                    .limit(FRAUD_LIMIT)
+                    .map(this::parseTransaction)
+                    //.flatMap(Optional::stream)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .toList();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private Optional<Transaction> parseTransaction(String line) {
+        try {
+            String[] chunks = line.split(",");
+            Transaction transaction = new TransactionMapper().ToDomain(
+                    chunks[0], chunks[1], chunks[2], chunks[3], chunks[4],
+                    chunks[5], chunks[6], chunks[7], chunks[8], chunks[9], chunks[10]
+            );
+            return Optional.of(transaction);
+        }catch (IllegalArgumentException e) {
+            System.err.println("Erro: " + line +" | "+ e.toString());
+            return Optional.empty();
+        }
     }
 }
