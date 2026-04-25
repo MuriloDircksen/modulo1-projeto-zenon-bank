@@ -6,12 +6,9 @@ import br.com.zenon.fraud.infrastructure.TransactionSQLRepository;
 public class DBMain {
     void main() {
         /*
-        Em seguida, busque pela
-        transação existente C1231006815 e por uma inexistente como C12345.
-        */
-        /*
         TransactionIngestor transactionIngestor = new TransactionIngestor();
         var transactions = transactionIngestor.ToTransactionList2("data/archive/PS_20174392719_1491204439457_log.csv");
+
         TransactionSQLRepository transactionSQLRepository = new TransactionSQLRepository();
 
         var time1 = System.currentTimeMillis();

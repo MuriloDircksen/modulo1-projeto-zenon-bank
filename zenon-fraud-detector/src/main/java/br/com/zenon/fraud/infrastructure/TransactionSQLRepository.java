@@ -12,9 +12,10 @@ import java.util.Optional;
 
 public class TransactionSQLRepository implements TransactionRepository {
 
-    private static final String URL = "jdbc:mysql://localhost:3306/transaction";
+    private static final String URL = "jdbc:mysql://localhost:3306/transaction?rewriteBatchedStatements=true";
     private static final String USER = "root";
     private static final String PASSWORD = "senha123";
+    public static final int JDBC_BATCH_SIZE = 1_000;
 
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
@@ -69,6 +70,60 @@ public class TransactionSQLRepository implements TransactionRepository {
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+    public void saveAll(List<Transaction> transactions) {
+        String sql = """
+            INSERT INTO 
+                Transactions (step, type, amount, nameOrig, oldBalanceOrig, newBalanceOrig, nameDest, oldBalanceDest, newBalanceDest, isFraud, isFlaggedFraud) 
+            VALUES 
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """;
+
+        try (Connection connection = getConnection()){
+
+            connection.setAutoCommit(false);
+
+            int countBatch = 0;
+            try(PreparedStatement ps = connection.prepareStatement(sql)){
+                for ( Transaction transaction : transactions) {
+                    ps.setInt(1, transaction.step());
+                    ps.setString(2, transaction.type().name());
+                    ps.setBigDecimal(3, transaction.amount());
+                    ps.setString(4, transaction.customerOrig().name());
+                    ps.setBigDecimal(5, transaction.customerOrig().oldBalance());
+                    ps.setBigDecimal(6, transaction.customerOrig().newBalance());
+                    ps.setString(7, transaction.customerDest().name());
+                    ps.setBigDecimal(8, transaction.customerDest().oldBalance());
+                    ps.setBigDecimal(9, transaction.customerDest().newBalance());
+                    ps.setBoolean(10, transaction.isFraud());
+                    ps.setBoolean(11, transaction.isFlaggedFraud());
+
+                    ps.addBatch();
+                    countBatch++;
+
+                    if (countBatch % JDBC_BATCH_SIZE == 0) {
+                        IO.println("Executando batch");
+                        ps.executeBatch();
+                        connection.commit();
+                    }
+                }
+                IO.println("Executando batch final");
+                ps.executeBatch();
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
+            catch(SQLException e) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    throw new RuntimeException("Erro ao executar roolback " + ex);
+                }
+
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error connection to the database: " + e);
         }
     }
     private Transaction mapResultSetToItem(ResultSet rs) throws SQLException {
