@@ -9,12 +9,15 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class EfficientTransactionIngestor {
     public static final int FRAUD_LIMIT = 10_000;
-    public static final int LINE_BATCH_SIZE = 5_000;
+    public static final int LINE_BATCH_SIZE = 2_500;
 
     public void readAsStream(String pathName, Consumer<Transaction> consumer) {
         try(Stream<String> lines = Files.lines(Path.of(pathName))) {
@@ -33,7 +36,9 @@ public class EfficientTransactionIngestor {
     }
 
     public void readAsBatch(String pathName, Consumer<List<Transaction>> batchConsumer) {
-        try(Stream<String> lines = Files.lines(Path.of(pathName)).skip(1).limit(FRAUD_LIMIT)) {
+        try(ExecutorService executor= Executors.newFixedThreadPool(10);
+            Stream<String> lines = Files.lines(Path.of(pathName)).skip(1);) {
+
             var iterator = lines.iterator();
 
             List<String> lineBatch = new ArrayList<>(LINE_BATCH_SIZE);
@@ -42,15 +47,17 @@ public class EfficientTransactionIngestor {
                 lineBatch.add(line);
 
                 if(lineBatch.size() >= LINE_BATCH_SIZE) {
-                    executeBatch(lineBatch, batchConsumer);
+                    //evitar que as threads se choquem no acesso e limpeza da lista
+                    final List<String> currentLineBatch = List.copyOf(lineBatch);
+                    executor.submit(() -> executeBatch(currentLineBatch, batchConsumer));
                     lineBatch.clear();
                 }
 
             }
             if (!lineBatch.isEmpty()) {
-                executeBatch(lineBatch, batchConsumer);
+                final List<String> currentLineBatch = List.copyOf(lineBatch);
+                executor.submit(() -> executeBatch(currentLineBatch, batchConsumer));
             }
-
         }
         catch (IOException ex) {
             throw new RuntimeException();
