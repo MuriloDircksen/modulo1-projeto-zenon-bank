@@ -7,6 +7,7 @@ import br.com.zenon.fraud.infrastructure.Interfaces.TransactionRepository;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.util.List;
 import java.util.Optional;
 
 public class TransactionSQLRepository implements TransactionRepository {
@@ -21,7 +22,12 @@ public class TransactionSQLRepository implements TransactionRepository {
 
     @Override
     public Optional<Transaction> GetTransactionByCustomerName(String customerName) {
-        String sql = "SELECT * FROM Transactions WHERE nameOrig = ?";
+        String sql = """
+            SELECT * FROM Transactions 
+            WHERE nameOrig = ?
+            ORDER BY step
+            LIMIT 1
+            """;
         try (Connection connection = getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, customerName);
@@ -36,10 +42,14 @@ public class TransactionSQLRepository implements TransactionRepository {
         }
         return Optional.empty();
     }
-
     @Override
     public void save(Transaction transaction) {
-        String sql = "INSERT INTO Transactions (step, type, amount, nameOrig, oldBalanceOrig, newBalanceOrig, nameDest, oldBalanceDest, newBalanceDest, isFraud, isFlaggedFraud) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = """
+            INSERT INTO 
+                Transactions (step, type, amount, nameOrig, oldBalanceOrig, newBalanceOrig, nameDest, oldBalanceDest, newBalanceDest, isFraud, isFlaggedFraud) 
+            VALUES 
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """;
 
         try (Connection connection = getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {

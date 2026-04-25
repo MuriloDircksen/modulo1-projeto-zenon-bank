@@ -20,6 +20,6 @@ public class TransactionMapRepository implements TransactionRepository {
 
     @Override
     public void save(Transaction transaction) {
-
+        this._transactions.putIfAbsent(transaction.customerOrig().name(), transaction);
     }
 }
